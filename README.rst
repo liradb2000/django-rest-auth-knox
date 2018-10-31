@@ -1,5 +1,6 @@
-Welcome to django-rest-auth
+Welcome to django-rest-auth-knox
 ===========================
+Intergrated django-rest-auth with django-rest-knox
 
 .. image:: https://travis-ci.org/Tivix/django-rest-auth.svg
     :target: https://travis-ci.org/Tivix/django-rest-auth
