@@ -20,6 +20,13 @@ from .app_settings import (
     PasswordResetSerializer, PasswordResetConfirmSerializer,
     PasswordChangeSerializer, JWTSerializer, create_token
 )
+
+from knox.views import (
+    LoginView as KnoxLoginView,
+    LogoutView as KnoxLogoutView,
+    LogoutAllView as KnoxLogoutAllView,
+)
+
 from .models import TokenModel
 from .utils import jwt_encode
 
@@ -63,6 +70,10 @@ class LoginView(GenericAPIView):
 
         if getattr(settings, 'REST_USE_JWT', False):
             self.token = jwt_encode(self.user)
+        elif getattr(settings, 'REST_USE_KNOX',False):
+            self.process_login()
+            return KnoxLoginView.post(self=self,request=self.request, format=None)
+            #self.token = 
         else:
             self.token = create_token(self.token_model, self.user,
                                       self.serializer)
@@ -92,9 +103,11 @@ class LoginView(GenericAPIView):
                                               context={'request': request})
         self.serializer.is_valid(raise_exception=True)
 
-        self.login()
-        return self.get_response()
-
+        if not getattr(settings, 'REST_USE_KNOX', False):
+            self.login()
+            return self.get_response()
+        else:
+            return self.login()
 
 class LogoutView(APIView):
     """
@@ -117,15 +130,20 @@ class LogoutView(APIView):
         return self.logout(request)
 
     def logout(self, request):
-        try:
-            request.user.auth_token.delete()
-        except (AttributeError, ObjectDoesNotExist):
-            pass
+        if getattr(settings, 'REST_USE_KNOX',False):
+            django_logout(request)
+            return KnoxLogoutView.post(self, request, format=None)
 
-        django_logout(request)
+        else:
+            try:
+                request.user.auth_token.delete()
+            except (AttributeError, ObjectDoesNotExist):
+                pass
+            
+            django_logout(request)
 
-        return Response({"detail": _("Successfully logged out.")},
-                        status=status.HTTP_200_OK)
+            return Response({"detail": _("Successfully logged out.")},
+                            status=status.HTTP_200_OK)
 
 
 class UserDetailsView(RetrieveUpdateAPIView):
@@ -221,3 +239,6 @@ class PasswordChangeView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": _("New password has been saved.")})
+
+class LogoutAllView(KnoxLogoutAllView):
+    pass

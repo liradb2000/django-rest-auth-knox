@@ -11,20 +11,21 @@ f.close()
 
 
 setup(
-    name='django-rest-auth',
+    name='django-rest-auth-knox',
     version='0.9.3',
-    author='Sumit Chachra',
-    author_email='chachra@tivix.com',
-    url='http://github.com/Tivix/django-rest-auth',
+    author='Sumit Chachra, Dabeom Kim',
+    author_email='chachra@tivix.com, kdb621@nexivil.com',
+    url='https://github.com/liradb2000/django-rest-auth-knox',
     description='Create a set of REST API endpoints for Authentication and Registration',
     packages=find_packages(),
     long_description=long_description,
-    keywords='django rest auth registration rest-framework django-registration api',
+    keywords='django rest auth registration rest-framework django-registration api with django-rest-knox',
     zip_safe=False,
     install_requires=[
         'Django>=1.8.0',
         'djangorestframework>=3.1.3',
         'six>=1.9.0',
+        'django-rest-knox>=3.4.0',
     ],
     extras_require={
         'with_social': ['django-allauth>=0.25.0'],
